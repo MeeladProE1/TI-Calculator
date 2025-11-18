@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Main Launcher</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      background: #0091bd;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(1.1); }
+    .calculatorDiv {
+      margin: auto;
+      transform-origin: top center;
+    }
+  </style>
+  <!-- TI emulator engine -->
+  <script src="https://mn.testnav.com/client/texasinstruments/js/ELG-min.js"></script>
+  <script id="h84statej" type="application/json"
+          data-url="https://mn.testnav.com/client/texasinstruments/bin/No_AppsCE.h84statej"></script>
+  <script id="ti84faceplate" type="application/json"
+          data-url="https://mn.testnav.com/client/texasinstruments/images/TI84CE_touch.svg"></script>
+</head>
+<body>
+  <button id="openBtn">Open TI‑84 Plus CE</button>
+
+  <script>
+    const h84 = document.getElementById("h84statej");
+    const face = document.getElementById("ti84faceplate");
+
+    // Strip hash fragments from XHR URLs
+    XMLHttpRequest.prototype.open = new Proxy(XMLHttpRequest.prototype.open, {
+      apply: (t,a,x) => {
+        if (typeof x[1] === "string") x[1] = x[1].replace(/#.*$/, "");
+        return Reflect.apply(t,a,x);
+      }
+    });
+
+    const blob = s => s ? URL.createObjectURL(new Blob([JSON.parse(s)])) : null;
+
+    document.getElementById("openBtn").addEventListener("click", () => {
+      // 1. Create a temporary div
+      const tempDiv = document.createElement("div");
+      tempDiv.id = "calculatorDiv";
+      tempDiv.className = "calculatorDiv";
+      document.body.appendChild(tempDiv);
+
+      // 2. Run emulator inside it
+      new TI84PCE({
+        ROMLocation: blob(h84.innerHTML) || h84.dataset.url + "#.h84statej",
+        FaceplateLocation: blob(face.innerHTML) || face.dataset.url + "#.svg",
+        Container: tempDiv
+      });
+
+      // 3. Wait ~2 seconds before measuring
+      setTimeout(() => {
+        const w = tempDiv.offsetWidth;
+        const h = tempDiv.offsetHeight;
+
+        // 4. Open popup with emulator HTML
+        const popup = window.open("", "ti84_popup", `width=${w},height=${h},resizable=yes`);
+        popup.document.write(`
+<html lang="en"><head>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="theme-color" content="#222">
+  <link rel="icon" href="/calc.png">
+  <link rel="stylesheet" href="https://mn.testnav.com/client/public/stylesheets/tn.css">
+  <style>
+    body{margin:0;font-family:sans-serif;background:#eee;display:flex;flex-direction:column;align-items:center;height:100vh}
+    .calculatorDiv{margin:auto;transition:.3s;transform-origin:top center}
+  </style>
+  <script src="https://mn.testnav.com/client/texasinstruments/js/ELG-min.js"></scr`+`ipt>
+  <script id="h84statej" type="application/json" data-url="https://mn.testnav.com/client/texasinstruments/bin/No_AppsCE.h84statej"></sc`+`ript>
+  <script id="ti84faceplate" type="application/json" data-url="https://mn.testnav.com/client/texasinstruments/images/TI84CE_touch.svg"></sc`+`ript>
+</head>
+<body>
+  <div id="calculatorDiv" class="calculatorDiv" tabindex="0" role="application"></div>
+  <script>
+    const $=id=>document.getElementById(id),
+          h84=$("h84statej"),
+          face=$("ti84faceplate"),
+          calc=$("calculatorDiv");
+    XMLHttpRequest.prototype.open=new Proxy(XMLHttpRequest.prototype.open,{apply:(t,a,x)=>{if(typeof x[1]=="string")x[1]=x[1].replace(/#.*$/,"");return Reflect.apply(t,a,x)}});
+    const blob=s=>s?URL.createObjectURL(new Blob([JSON.parse(s)])):null;
+    new TI84PCE({
+      ROMLocation:blob(h84.innerHTML)||h84.dataset.url+"#.h84statej",
+      FaceplateLocation:blob(face.innerHTML)||face.dataset.url+"#.svg",
+      Container:calc
+    });
+
+    // After 3 seconds, expand calculatorDiv to full window size
+    setTimeout(() => {
+      calc.style.width = "100%";
+      calc.style.height = "100%";
+    }, 3000);
+  </sc`+`ript>
+</body></html>
+        `);
+        popup.document.close();
+
+        // 5. Remove emulator from main page
+        tempDiv.remove();
+      }, 2000); // wait 2 seconds before measuring
+    });
+  </script>
+</body>
+</html>
