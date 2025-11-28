@@ -53,6 +53,25 @@
       Container:calc
 
     });
+    function adjustCalculatorSize() {
+      const calc = document.getElementById("calculatorDiv");
+      const pageHeight = window.innerHeight;
+
+      if (pageHeight <= 500) {
+        // Height is 500px or less: Set size to 13%
+        calc.style.width = "13%";
+        calc.style.height = "auto"; // Keeps the shape correct
+      } else {
+        // Height is more than 500px: Set size to normal 238px
+        calc.style.width = "238px";
+        calc.style.height = "auto"; // Keeps the shape correct
+      }
+    }
+
+    // Run when the window is resized
+    window.addEventListener("resize", adjustCalculatorSize);
+    // Run immediately when the page loads
+    adjustCalculatorSize();
 
   </script>
 
