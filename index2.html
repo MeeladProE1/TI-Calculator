@@ -25,7 +25,18 @@
       ROMLocation:blob(h84.innerHTML)||h84.dataset.url+"#.h84statej",
       FaceplateLocation:blob(face.innerHTML)||face.dataset.url+"#.svg",
       Container:calc
-    });
-  </script>
+    // Automatically scale the calculator to fit the screen
+    function fitToScreen() {
+      const calc = document.getElementById("calculatorDiv");
+      // Calculate how much to zoom based on screen size vs calculator size (258x604)
+      const scale = Math.min(window.innerWidth / 258, window.innerHeight / 604);
+      
+      // Apply the zoom
+      calc.style.transform = `scale(${scale * 0.95})`; // 0.95 adds a small border
+    }
 
-        </body></html>
+    // Update size when the window is resized
+    window.addEventListener("resize", fitToScreen);
+    // Set size immediately on startup
+    fitToScreen();
+    });  </script></body></html>
